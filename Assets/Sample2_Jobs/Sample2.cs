@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 using Unity.Jobs;
 using Unity.Burst;
 using System.Collections.Generic;
+using UnityEngine.Jobs;
 
 public class Sample2 : MonoBehaviour
 {
@@ -74,14 +75,18 @@ public class Sample2 : MonoBehaviour
         //}
         if (useJobs)
         {
-            NativeArray<float3> positions = new NativeArray<float3>(dragonList.Count, Allocator.TempJob);
+            //NativeArray<float3> positions = new NativeArray<float3>(dragonList.Count, Allocator.TempJob);
             NativeArray<float> moveYs = new NativeArray<float>(dragonList.Count, Allocator.TempJob);
+            TransformAccessArray transformAccessArray = new TransformAccessArray(dragonList.Count);
 
             for (int i = 0; i < dragonList.Count; i++)
             {
-                positions[i] = dragonList[i].transform.position;
+                //positions[i] = dragonList[i].transform.position;
                 moveYs[i] = dragonList[i].moveY;
+                transformAccessArray.Add(dragonList[i].transform);
             }
+            /**
+            
             ReallyTouchJobParallelFor reallyTouchJobParallelFor = new ReallyTouchJobParallelFor
             {
                 deltaTime = Time.deltaTime,
@@ -89,15 +94,24 @@ public class Sample2 : MonoBehaviour
                 moveYs = moveYs,
             };
             reallyTouchJobParallelFor.Schedule(dragonList.Count, 100).Complete();
+            */
+
+            ReallyTouchJobParallelForTransforms reallyTouchJobParallelForTransforms = new ReallyTouchJobParallelForTransforms()
+            {
+                deltaTime = Time.deltaTime,
+                moveYs = moveYs,
+            };
+            reallyTouchJobParallelForTransforms.Schedule(transformAccessArray).Complete();
 
             for (int i = 0; i < dragonList.Count; i++)
             {
-                dragonList[i].transform.position = positions[i];
+                //dragonList[i].transform.position = positions[i];
                 dragonList[i].moveY = moveYs[i];
             }
 
-            positions.Dispose();
+            //positions.Dispose();
             moveYs.Dispose();
+            transformAccessArray.Dispose();
         }
         else
         {
@@ -165,6 +179,28 @@ public struct ReallyTouchJobParallelFor : IJobParallelFor
         if (positions[i].y > 5)
             moveYs[i] = -math.abs(moveYs[i]);
         if (positions[i].y < -5)
+            moveYs[i] = +math.abs(moveYs[i]);
+        //莫妮卡
+        float value = 0f;
+        for (int j = 0; j < 1000; j++)
+        {
+            value = math.exp10(math.sqrt(value));
+        }
+    }
+}
+
+[BurstCompile]
+public struct ReallyTouchJobParallelForTransforms : IJobParallelForTransform
+{
+    public NativeArray<float> moveYs;
+    [ReadOnly] public float deltaTime;
+
+    public void Execute(int i, TransformAccess transform)
+    {
+        transform.position += new Vector3(0, moveYs[i] * deltaTime, 0);
+        if (transform.position.y > 5)
+            moveYs[i] = -math.abs(moveYs[i]);
+        if (transform.position.y < -5)
             moveYs[i] = +math.abs(moveYs[i]);
         //莫妮卡
         float value = 0f;
