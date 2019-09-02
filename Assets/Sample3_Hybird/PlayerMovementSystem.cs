@@ -23,7 +23,6 @@ public class PlayerMovementSystem : ComponentSystem
     {
         Entities.ForEach((Transform transform, HybirdPlayerInput input, HybirdMoveSpeed moveSpeed) =>
         {
-            Debug.Log("123123123");
             var position = transform.position;
             var rotation = transform.rotation;
 
