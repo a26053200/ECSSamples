@@ -12,7 +12,7 @@ namespace Sample5_Shooter
             {
                 input.Horizontal = Input.GetAxis("Horizontal");
                 input.Vertical = Input.GetAxis("Vertical");
-                if (Input.GetButton("Mouse X"))
+                if (Input.GetMouseButton(0) || Input.touchCount>0 && Input.GetTouch(0).phase== TouchPhase.Moved)
                 {
                     var touchPosition = Input.mousePosition;
                     if (Camera.main != null)
