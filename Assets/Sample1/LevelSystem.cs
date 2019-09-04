@@ -1,14 +1,17 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 
-public class LevelSystem : ComponentSystem
+namespace Sample1
 {
-    protected override void OnUpdate()
+    public class LevelSystem : ComponentSystem
     {
-        Entities.ForEach((ref LevelComponent levelComponent) =>
+        protected override void OnUpdate()
         {
-            levelComponent.level = 1 + Time.time;
-            //Debug.Log(levelComponent.level);
-        });
+            Entities.ForEach((ref LevelComponent levelComponent) =>
+            {
+                levelComponent.level = 1 + Time.time;
+                //Debug.Log(levelComponent.level);
+            });
+        }
     }
 }

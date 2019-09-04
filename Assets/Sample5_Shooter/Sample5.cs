@@ -22,8 +22,15 @@ namespace Sample5_Shooter
 
             EntityArchetype entityArchetype = entityManager.CreateArchetype(
                 typeof(MoveSpeed),
-                typeof(PlayerInput)
+                typeof(PlayerInput),
+                typeof(Translation),
+                typeof(CompositeRotation),
+                typeof(Rotation),
+                typeof(RotationEulerXYZ),
+                typeof(RenderMesh),
+                typeof(LocalToWorld)
             );
+            
             //实体的本地数组
             Entity entity = gameObjectEntity.Entity;
             entityManager.AddComponent<MoveSpeed>(entity);

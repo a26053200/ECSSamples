@@ -1,6 +1,9 @@
 ﻿using Unity.Entities;
 
-public struct LevelComponent : IComponentData
+namespace Sample1
 {
-    public float level;
+    public struct LevelComponent : IComponentData
+    {
+        public float level;
+    }
 }

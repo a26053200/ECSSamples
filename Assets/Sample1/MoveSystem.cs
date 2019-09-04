@@ -3,17 +3,20 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class MoveSystem : ComponentSystem
+namespace Sample1
 {
-    protected override void OnUpdate()
+    public class MoveSystem : ComponentSystem
     {
-        Entities.ForEach((ref Translation translation, ref MoveSpeedComponent moveSpeed) =>
+        protected override void OnUpdate()
         {
-            translation.Value.y += moveSpeed.speed * Time.deltaTime;
-            if (translation.Value.y > 5f)
-                moveSpeed.speed = -math.abs(moveSpeed.speed);
-            if (translation.Value.y < -5f)
-                moveSpeed.speed = +math.abs(moveSpeed.speed);
-        });
+            Entities.ForEach((ref Translation translation, ref MoveSpeedComponent moveSpeed) =>
+            {
+                translation.Value.y += moveSpeed.speed * Time.deltaTime;
+                if (translation.Value.y > 5f)
+                    moveSpeed.speed = -math.abs(moveSpeed.speed);
+                if (translation.Value.y < -5f)
+                    moveSpeed.speed = +math.abs(moveSpeed.speed);
+            });
+        }
     }
 }
