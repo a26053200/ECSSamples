@@ -16,7 +16,7 @@ namespace Sample4_Pure
             public void Execute(ref MoveSpeed moveSpeed, ref PlayerInput input, ref Translation translation)
             {
                 translation.Value.xyz += new float3(moveSpeed.Speed * input.Horizontal * DeltaTime,0,0);
-            }
+            }        
         }
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {

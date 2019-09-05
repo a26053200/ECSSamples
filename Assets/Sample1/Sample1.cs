@@ -45,10 +45,10 @@ namespace Sample1
                 entityManager.SetComponentData(nativeArray[i], new Translation{
                         Value = new float3(Random.Range(-10f, 10f), Random.Range(-5f, 5f), 0)
                     });
-                entityManager.SetComponentData(nativeArray[i], new RotationEulerXYZ
-                {
-                    Value = new float3(0, 135, 0),
-                });
+//                entityManager.SetComponentData(nativeArray[i], new RotationEulerXYZ
+//                {
+//                    Value = new float3(0, 135, 0),
+//                });
 
                 entityManager.SetSharedComponentData(nativeArray[i],new RenderMesh {
                     mesh = mesh,
