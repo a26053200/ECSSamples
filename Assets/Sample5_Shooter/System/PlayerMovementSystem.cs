@@ -11,13 +11,17 @@ namespace Sample5_Shooter
     {
         protected override void OnUpdate()
         {
-            Entities.ForEach((Transform transform ,ref MoveSpeed moveSpeed, ref PlayerInput input) =>
+            Entities.ForEach((Transform transform ,ref Rotation rotation, ref MoveSpeed moveSpeed, ref PlayerInput input) =>
             {
-                transform.position += new Vector3(
+                var pos = transform.position;
+                pos += new Vector3(
                     input.Horizontal * Time.deltaTime * moveSpeed.Speed,
                     0,
                     input.Vertical * Time.deltaTime * moveSpeed.Speed);
-                transform.rotation = input.Rotation;
+                transform.position = pos;
+                var rot = input.Rotation;
+                transform.rotation = rot;
+                rotation.Value = rot;
             });
         }
     }

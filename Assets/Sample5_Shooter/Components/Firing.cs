@@ -6,9 +6,4 @@ namespace Sample5_Shooter
     {
         public float FireStartTime;
     }
-    
-    public struct IsFiring : IComponentData
-    {
-        public bool Value;
-    }
 }

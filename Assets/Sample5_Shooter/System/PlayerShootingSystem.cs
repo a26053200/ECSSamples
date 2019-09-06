@@ -1,4 +1,5 @@
 using System.Threading;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -12,48 +13,55 @@ namespace Sample5_Shooter
 {
     public class PlayerShootingSystem : JobComponentSystem
     {
-        private NativeList<Entity> _deck;
         private EntityQuery _query;
         private EndSimulationEntityCommandBufferSystem _barrier;
         private NativeArray<Entity> _weaponEntities;
 
         protected override void OnCreate()
         {
-            _deck = new NativeList<Entity>(64, Allocator.Persistent);
-            _query = GetEntityQuery(ComponentType.ReadOnly<Weapon>());
-
+            _query = GetEntityQuery(
+                ComponentType.ReadWrite<Weapon>(),
+                ComponentType.Exclude<Firing>());
+            //_weaponEntities = _query.ToEntityArray(Allocator.TempJob);
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
-
-        private struct AddToDeckJob : IJob
-        {
-            public NativeList<Entity> Deck;
-            [DeallocateOnJobCompletion] public NativeArray<Entity> Entities;
-
-            public void Execute()
-            {
-                for (var i = 0; i < Entities.Length; ++i)
-                    Deck.Add(Entities[i]);
-            }
-        }
-
+        
+        
+        //[BurstCompile]
         private struct PlayerShootingJob : IJobParallelFor
         {
             public float FireStartTime;
             [ReadOnly] public EntityCommandBuffer EntityCommandBuffer;
-            [DeallocateOnJobCompletion] public NativeArray<Entity> Entities;
-
+            //[DeallocateOnJobCompletion] 
+            public NativeArray<Entity> Entities;
+            //public EntityQuery Query;
             public void Execute(int index)
             {
-                if (FireStartTime > 0)
+                EntityCommandBuffer.AddComponent(Entities[index], new Firing()
                 {
-                    EntityCommandBuffer.AddComponent<Firing>(Entities[index]);
-                    EntityCommandBuffer.SetComponent(Entities[index], new Firing()
-                    {
-                        FireStartTime = FireStartTime
-                    });
-                }
+                    FireStartTime = FireStartTime
+                });
             }
+
+//            public void Execute(ref Weapon weapon)
+//            {
+//                EntityCommandBuffer.AddComponent(Query, ComponentType.ReadOnly<Firing>());
+//            }
+
+//            public void Execute()
+//            {
+//                if (FireStartTime > 0)
+//                {
+//                    var entity = EntityCommandBuffer.CreateEntity();
+//                    EntityCommandBuffer.AddComponent<Firing>(entity);
+//                    EntityCommandBuffer.SetComponent(entity, new Firing()
+//                    {
+//                        FireStartTime = FireStartTime
+//                    });
+//                }
+//            }
+
+            
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -61,29 +69,22 @@ namespace Sample5_Shooter
             if (Input.GetButton("Fire1"))
             {
                 _weaponEntities = _query.ToEntityArray(Allocator.TempJob);
-                var addToDeckJob = new AddToDeckJob
+                var playerShootingJob = new PlayerShootingJob()
                 {
-                    Deck = _deck,
-                    Entities = _weaponEntities,
-                };
-                var job = new PlayerShootingJob()
-                {
+                    //Query = _query,
                     Entities = _weaponEntities,
                     EntityCommandBuffer = _barrier.CreateCommandBuffer(),
                     FireStartTime = Time.time
                 };
-                inputDeps = addToDeckJob.Schedule(inputDeps);
-//                Debug.Log("Create a bullet");
-                inputDeps = job.Schedule(_weaponEntities.Length, 64, inputDeps);
+                inputDeps = playerShootingJob.Schedule(_weaponEntities.Length,64, inputDeps);
                 _barrier.AddJobHandleForProducer(inputDeps);
             }
-
             return inputDeps;
         }
 
         protected override void OnDestroy()
         {
-            _deck.Dispose();
+            _weaponEntities.Dispose();
         }
     }
 }

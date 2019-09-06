@@ -13,6 +13,8 @@ namespace Sample5_Shooter
 
         public static EntityArchetype FireEntityArchetype;
         
+        public static EntityArchetype BulletEntityArchetype;
+        
         [SerializeField]
         private GameObjectEntity gameObjectEntity;
 
@@ -35,57 +37,45 @@ namespace Sample5_Shooter
 
             FireEntityArchetype = entityManager.CreateArchetype(typeof(Firing));
             
-//            EntityArchetype entityArchetype = entityManager.CreateArchetype(
-//                typeof(MoveSpeed),
-//                typeof(PlayerInput),
-//                typeof(Translation),
-//                typeof(CompositeRotation),
-//                typeof(Rotation),
-//                typeof(RotationEulerXYZ),
-//                typeof(RenderMesh),
-//                typeof(LocalToWorld)
-//            );
+            BulletEntityArchetype = entityManager.CreateArchetype(
+                typeof(MoveSpeed),
+                typeof(Translation),
+                typeof(RenderMesh),
+                typeof(LocalToWorld)
+            );
             
             //实体的本地数组
             Entity entity = gameObjectEntity.Entity;
             entityManager.AddComponent<MoveSpeed>(entity);
             entityManager.AddComponent<PlayerInput>(entity);
+            entityManager.AddComponent<Rotation>(entity);
+            entityManager.AddComponent<LocalToWorld>(entity);
             entityManager.SetComponentData(entity, new MoveSpeed(){Speed =  speed});
             
             entity = weaponEntity.Entity;
             entityManager.AddComponent<Weapon>(entity);
-//            entityManager.AddComponent<IsFiring>(entity);
-
+            entityManager.AddComponent<LocalToWorld>(entity);
             //CreateBullet();
         }
 
-        public static void CreateBullet(float fireStartTime, EntityCommandBuffer buffer)
+        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, EntityCommandBuffer buffer)
         {
             //Debug.Log("Generate a bullet");
-            EntityManager entityManager = World.Active.EntityManager;
-            EntityArchetype entityArchetype = entityManager.CreateArchetype(
-                typeof(MoveSpeed),
-                typeof(PlayerInput),
-                typeof(CompositeRotation),
-                typeof(Rotation ),
-                typeof(Translation),
-                typeof(RenderMesh),
-                typeof(LocalToWorld),
-                typeof(Firing)
-            );
-            Entity entity = buffer.CreateEntity(entityArchetype);
-            entityManager.SetComponentData(entity, new Translation{
-                Value = float3.zero
+            Entity entity = buffer.CreateEntity(BulletEntityArchetype);
+            buffer.SetComponent(entity, localToWorld);
+            buffer.SetComponent(entity, new Translation()
+            {
+                Value = localToWorld.Position
             });
-            entityManager.SetComponentData(entity, new MoveSpeed
+            buffer.SetComponent(entity, new MoveSpeed
             {
                 Speed = 6f
             });
-            entityManager.SetComponentData(entity, new Firing
-            {
-                FireStartTime = fireStartTime
-            });
-            entityManager.SetSharedComponentData(entity,new RenderMesh {
+//            entityManager.SetComponent(entity, new Firing
+//            {
+//                FireStartTime = fireStartTime
+//            });
+            buffer.SetSharedComponent(entity,new RenderMesh {
                 mesh = Instance.mesh,
                 material = Instance.material,
                 castShadows = ShadowCastingMode.On,
