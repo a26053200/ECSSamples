@@ -25,12 +25,16 @@ namespace Sample5_Shooter
 
         protected override void OnUpdate()
         {
-//            Debug.Log("MoveForwardSystem 111111");
             Entities.ForEach(
-                (ref Translation translation, ref MoveSpeed moveSpeed, ref LocalToWorld localToWorld) =>
+                (ref Translation translation, ref MoveSpeed moveSpeed, ref WorldToLocal worldToLocal, ref LocalToWorld localToWorld) =>
                 {
-                    float3 s = Time.deltaTime * moveSpeed.Speed * localToWorld.Forward;
-                    translation.Value.xyz += s;
+                    var old = worldToLocal.Value;
+                    var s = Time.deltaTime * moveSpeed.Speed * worldToLocal.Forward;
+                    var d3Position = worldToLocal.Position;
+                    d3Position.xyz += s;
+                    old.c3 = new float4(d3Position.xyz, old.c3.w);
+                    worldToLocal.Value = old;
+                    translation.Value = worldToLocal.Position;
                 });
         }
     }

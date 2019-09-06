@@ -41,7 +41,8 @@ namespace Sample5_Shooter
                 typeof(MoveSpeed),
                 typeof(Translation),
                 typeof(RenderMesh),
-                typeof(LocalToWorld)
+                typeof(LocalToWorld),
+                typeof(WorldToLocal)
             );
             
             //实体的本地数组
@@ -50,19 +51,23 @@ namespace Sample5_Shooter
             entityManager.AddComponent<PlayerInput>(entity);
             entityManager.AddComponent<Rotation>(entity);
             entityManager.AddComponent<LocalToWorld>(entity);
+            entityManager.AddComponent<WorldToLocal>(entity);
             entityManager.SetComponentData(entity, new MoveSpeed(){Speed =  speed});
             
             entity = weaponEntity.Entity;
             entityManager.AddComponent<Weapon>(entity);
+            entityManager.AddComponent<Rotation>(entity);
+            entityManager.AddComponent<WorldToLocal>(entity);
             entityManager.AddComponent<LocalToWorld>(entity);
             //CreateBullet();
         }
 
-        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, EntityCommandBuffer buffer)
+        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, WorldToLocal worldToLocal, EntityCommandBuffer buffer)
         {
             //Debug.Log("Generate a bullet");
             Entity entity = buffer.CreateEntity(BulletEntityArchetype);
             buffer.SetComponent(entity, localToWorld);
+            buffer.SetComponent(entity, worldToLocal);
             buffer.SetComponent(entity, new Translation()
             {
                 Value = localToWorld.Position
