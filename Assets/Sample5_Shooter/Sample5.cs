@@ -42,6 +42,7 @@ namespace Sample5_Shooter
                 typeof(Translation),
                 typeof(RenderMesh),
                 typeof(LocalToWorld),
+                typeof(Rotation),
                 typeof(WorldToLocal)
             );
             
@@ -62,16 +63,23 @@ namespace Sample5_Shooter
             //CreateBullet();
         }
 
-        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, WorldToLocal worldToLocal, EntityCommandBuffer buffer)
+        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, WorldToLocal worldToLocal, Rotation rotation, EntityCommandBuffer buffer)
         {
             //Debug.Log("Generate a bullet");
             Entity entity = buffer.CreateEntity(BulletEntityArchetype);
-            buffer.SetComponent(entity, localToWorld);
-            buffer.SetComponent(entity, worldToLocal);
+            buffer.SetComponent(entity, new LocalToWorld
+            {
+                Value = localToWorld.Value
+            });
+            buffer.SetComponent(entity, new WorldToLocal
+            {
+                Value = worldToLocal.Value
+            });
             buffer.SetComponent(entity, new Translation()
             {
                 Value = localToWorld.Position
             });
+            buffer.SetComponent(entity, rotation);
             buffer.SetComponent(entity, new MoveSpeed
             {
                 Speed = 6f

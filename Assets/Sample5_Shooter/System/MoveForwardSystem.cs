@@ -26,15 +26,11 @@ namespace Sample5_Shooter
         protected override void OnUpdate()
         {
             Entities.ForEach(
-                (ref Translation translation, ref MoveSpeed moveSpeed, ref WorldToLocal worldToLocal, ref LocalToWorld localToWorld) =>
+                (ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref WorldToLocal localToWorld) =>
                 {
-                    var old = worldToLocal.Value;
-                    var s = Time.deltaTime * moveSpeed.Speed * worldToLocal.Forward;
-                    var d3Position = worldToLocal.Position;
-                    d3Position.xyz += s;
-                    old.c3 = new float4(d3Position.xyz, old.c3.w);
-                    worldToLocal.Value = old;
-                    translation.Value = worldToLocal.Position;
+                    //Debug.Log(localToWorld.Forward);
+                    var dir = math.mul(rotation.Value , new float3(1, 0, 1));
+                    translation.Value.xyz += Time.deltaTime * moveSpeed.Speed * localToWorld.Forward;
                 });
         }
     }
