@@ -43,7 +43,8 @@ namespace Sample5_Shooter
                 typeof(RenderMesh),
                 typeof(LocalToWorld),
                 typeof(Rotation),
-                typeof(WorldToLocal)
+                typeof(WorldToLocal),
+                typeof(Bullet)
             );
             
             //实体的本地数组
@@ -57,6 +58,7 @@ namespace Sample5_Shooter
             
             entity = weaponEntity.Entity;
             entityManager.AddComponent<Weapon>(entity);
+            entityManager.AddComponent<PlayerInput>(entity);
             entityManager.AddComponent<Rotation>(entity);
             entityManager.AddComponent<WorldToLocal>(entity);
             entityManager.AddComponent<LocalToWorld>(entity);
@@ -80,6 +82,10 @@ namespace Sample5_Shooter
                 Value = localToWorld.Position
             });
             buffer.SetComponent(entity, rotation);
+            buffer.SetComponent(entity, new Bullet
+            {
+                StartTime = fireStartTime
+            });
             buffer.SetComponent(entity, new MoveSpeed
             {
                 Speed = 6f

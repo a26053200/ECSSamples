@@ -1,3 +1,4 @@
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -6,32 +7,57 @@ using UnityEngine;
 
 namespace Sample5_Shooter
 {
-    public class MoveForwardSystem : ComponentSystem
+    public class MoveForwardSystem : JobComponentSystem
     {
-//        private struct MoveForwardJob : IJobForEach<Translation, PlayerInput,MoveSpeed>
-//        {
-//            public void Execute(ref Translation translation, ref PlayerInput input, ref MoveSpeed moveSpeed)
-//            {
-//                var dir = input.Rotation.eulerAngles.normalized;
-//                translation.Value.xyz += (float3)dir * moveSpeed.Speed;
-//            }
-//        }
-//        
-//        protected override JobHandle OnUpdate(JobHandle inputDeps)
-//        {
-//            var job = new MoveForwardJob();
-//            return job.Schedule(this, inputDeps);
-//        }
+        private EndSimulationEntityCommandBufferSystem _barrier;
 
-        protected override void OnUpdate()
+        protected override void OnCreate()
         {
-            Entities.ForEach(
-                (ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref WorldToLocal localToWorld) =>
-                {
-                    //Debug.Log(localToWorld.Forward);
-                    var dir = math.mul(rotation.Value , new float3(1, 0, 1));
-                    translation.Value.xyz += Time.deltaTime * moveSpeed.Speed * localToWorld.Forward;
-                });
+            _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
+
+        private struct MoveForwardJob : IJobForEachWithEntity_ECCCC<Translation,MoveSpeed,Rotation,Bullet>
+        {
+            public float CurrentTime;
+            public float DeltaTime;
+            [ReadOnly]public EntityCommandBuffer EntityCommandBuffer;
+
+            public void Execute(Entity entity, int index, ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref Bullet bullet)
+            {
+                //Debug.Log(localToWorld.Forward);
+                var dir = math.forward(rotation.Value);
+                translation.Value.xyz += DeltaTime * moveSpeed.Speed * dir;
+                if (CurrentTime - bullet.StartTime > 3f)
+                {
+                    EntityCommandBuffer.DestroyEntity(entity);
+                }
+            }
+        }
+        
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            var job = new MoveForwardJob()
+            {
+                CurrentTime = Time.time,
+                DeltaTime = Time.deltaTime,
+                EntityCommandBuffer = _barrier.CreateCommandBuffer(),
+            };
+            return job.Schedule(this, inputDeps);
+        }
+
+//        protected override void OnUpdate()
+//        {
+//            Entities.ForEach(
+//                (ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref Bullet bullet) =>
+//                {
+//                    //Debug.Log(localToWorld.Forward);
+//                    var dir = math.forward(rotation.Value);
+//                    translation.Value.xyz += Time.deltaTime * moveSpeed.Speed * dir;
+//                    if (Time.time - bullet.StartTime > 3f)
+//                    {
+//                        
+//                    }
+//                });
+//        }
     }
 }

@@ -23,6 +23,12 @@ namespace Sample5_Shooter
                 transform.rotation = rot;
                 rotation.Value = rot;
             });
+            Entities.ForEach((Transform transform ,ref Rotation rotation, ref Weapon weapon, ref PlayerInput input) =>
+            {
+                var rot = input.Rotation;
+                transform.rotation = rot;
+                rotation.Value = rot;
+            });
         }
     }
 }

@@ -16,52 +16,35 @@ namespace Sample5_Shooter
         private EntityQuery _query;
         private EndSimulationEntityCommandBufferSystem _barrier;
         private NativeArray<Entity> _weaponEntities;
-
+        private EntityCommandBuffer _buffer;
+        
         protected override void OnCreate()
         {
             _query = GetEntityQuery(
                 ComponentType.ReadWrite<Weapon>(),
                 ComponentType.Exclude<Firing>());
-            //_weaponEntities = _query.ToEntityArray(Allocator.TempJob);
+
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
-        
-        
+
+
         //[BurstCompile]
         private struct PlayerShootingJob : IJobParallelFor
         {
             public float FireStartTime;
             [ReadOnly] public EntityCommandBuffer EntityCommandBuffer;
-            //[DeallocateOnJobCompletion] 
             public NativeArray<Entity> Entities;
-            //public EntityQuery Query;
+
             public void Execute(int index)
             {
-                EntityCommandBuffer.AddComponent(Entities[index], new Firing()
+                if (FireStartTime > 0)
                 {
-                    FireStartTime = FireStartTime
-                });
+                    EntityCommandBuffer.AddComponent(Entities[index], new Firing()
+                    {
+                        FireStartTime = FireStartTime
+                    });
+                }
             }
-
-//            public void Execute(ref Weapon weapon)
-//            {
-//                EntityCommandBuffer.AddComponent(Query, ComponentType.ReadOnly<Firing>());
-//            }
-
-//            public void Execute()
-//            {
-//                if (FireStartTime > 0)
-//                {
-//                    var entity = EntityCommandBuffer.CreateEntity();
-//                    EntityCommandBuffer.AddComponent<Firing>(entity);
-//                    EntityCommandBuffer.SetComponent(entity, new Firing()
-//                    {
-//                        FireStartTime = FireStartTime
-//                    });
-//                }
-//            }
-
-            
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -69,21 +52,24 @@ namespace Sample5_Shooter
             if (Input.GetButton("Fire1"))
             {
                 _weaponEntities = _query.ToEntityArray(Allocator.TempJob);
-                var playerShootingJob = new PlayerShootingJob()
+                _buffer = _barrier.CreateCommandBuffer();
+                var job = new PlayerShootingJob()
                 {
-                    //Query = _query,
                     Entities = _weaponEntities,
-                    EntityCommandBuffer = _barrier.CreateCommandBuffer(),
-                    FireStartTime = Time.time
+                    EntityCommandBuffer = _buffer,
+                    FireStartTime = Time.time,
                 };
-                inputDeps = playerShootingJob.Schedule(_weaponEntities.Length,64, inputDeps);
+                inputDeps = job.Schedule(_weaponEntities.Length, 1, inputDeps);
                 _barrier.AddJobHandleForProducer(inputDeps);
             }
+
             return inputDeps;
         }
 
         protected override void OnDestroy()
         {
+            _buffer.Dispose();
+            _query.Dispose();
             _weaponEntities.Dispose();
         }
     }
