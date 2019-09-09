@@ -17,6 +17,7 @@ namespace Sample5_Shooter
         protected override void OnCreateManager()
         {
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+//            Enabled = false;
         }
 
         private struct FiringJob : IJobForEachWithEntity_ECCC<Rotation, Firing, LocalToWorld>
@@ -26,7 +27,11 @@ namespace Sample5_Shooter
 
             public void Execute(Entity entity, int index, ref Rotation rotation, ref Firing firing, ref LocalToWorld localToWorld)
             {
-                CreateBullet(FireStartTime,localToWorld, rotation, EntityCommandBuffer);
+                if (!firing.IsFired)
+                {
+                    CreateBullet(FireStartTime,localToWorld, rotation, EntityCommandBuffer);
+                    firing.IsFired = true;
+                }
             }
 
             private void CreateBullet(float fireStartTime,LocalToWorld localToWorld, Rotation rotation, EntityCommandBuffer buffer)
@@ -40,7 +45,11 @@ namespace Sample5_Shooter
                 });
                 buffer.SetComponent(entity, new MoveSpeed
                 {
-                    Speed = 6f
+                    Speed = Sample5.Instance.bulletSpeed
+                });
+                buffer.SetComponent(entity, new Scale
+                {
+                    Value = Sample5.Instance.bulletScale
                 });
                 buffer.SetComponent(entity, new Translation()
                 {

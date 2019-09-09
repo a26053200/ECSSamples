@@ -29,6 +29,15 @@ namespace Sample5_Shooter
         
         [SerializeField]
         private float speed;
+        
+        [SerializeField]
+        public float bulletSpeed = 6f;
+        
+        [SerializeField]
+        public float shootDeltaTime = 0.1f;
+        
+        [SerializeField]
+        public float bulletScale = 0.2f;
 
         void Start()
         {
@@ -44,11 +53,14 @@ namespace Sample5_Shooter
                 typeof(LocalToWorld),
                 typeof(Rotation),
                 typeof(WorldToLocal),
+                typeof(Scale),
                 typeof(Bullet)
             );
             
             //实体的本地数组
             Entity entity = gameObjectEntity.Entity;
+            entityManager.AddComponent<Player>(entity);
+            entityManager.AddComponent<Translation>(entity);
             entityManager.AddComponent<MoveSpeed>(entity);
             entityManager.AddComponent<PlayerInput>(entity);
             entityManager.AddComponent<Rotation>(entity);
@@ -63,43 +75,6 @@ namespace Sample5_Shooter
             entityManager.AddComponent<WorldToLocal>(entity);
             entityManager.AddComponent<LocalToWorld>(entity);
             //CreateBullet();
-        }
-
-        public static void CreateBullet(float fireStartTime, LocalToWorld localToWorld, WorldToLocal worldToLocal, Rotation rotation, EntityCommandBuffer buffer)
-        {
-            //Debug.Log("Generate a bullet");
-            Entity entity = buffer.CreateEntity(BulletEntityArchetype);
-            buffer.SetComponent(entity, new LocalToWorld
-            {
-                Value = localToWorld.Value
-            });
-            buffer.SetComponent(entity, new WorldToLocal
-            {
-                Value = worldToLocal.Value
-            });
-            buffer.SetComponent(entity, new Translation()
-            {
-                Value = localToWorld.Position
-            });
-            buffer.SetComponent(entity, rotation);
-            buffer.SetComponent(entity, new Bullet
-            {
-                StartTime = fireStartTime
-            });
-            buffer.SetComponent(entity, new MoveSpeed
-            {
-                Speed = 6f
-            });
-//            entityManager.SetComponent(entity, new Firing
-//            {
-//                FireStartTime = fireStartTime
-//            });
-            buffer.SetSharedComponent(entity,new RenderMesh {
-                mesh = Instance.mesh,
-                material = Instance.material,
-                castShadows = ShadowCastingMode.On,
-                receiveShadows = true
-            });
         }
     }
 }

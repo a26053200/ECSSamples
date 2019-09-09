@@ -14,6 +14,7 @@ namespace Sample5_Shooter
         protected override void OnCreate()
         {
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+//            Enabled = false;
         }
 
         private struct MoveForwardJob : IJobForEachWithEntity_ECCCC<Translation,MoveSpeed,Rotation,Bullet>
@@ -44,20 +45,9 @@ namespace Sample5_Shooter
             };
             return job.Schedule(this, inputDeps);
         }
-
-//        protected override void OnUpdate()
+//        protected override void OnCreateManager()
 //        {
-//            Entities.ForEach(
-//                (ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref Bullet bullet) =>
-//                {
-//                    //Debug.Log(localToWorld.Forward);
-//                    var dir = math.forward(rotation.Value);
-//                    translation.Value.xyz += Time.deltaTime * moveSpeed.Speed * dir;
-//                    if (Time.time - bullet.StartTime > 3f)
-//                    {
-//                        
-//                    }
-//                });
+//            _buffer.Dispose();
 //        }
     }
 }

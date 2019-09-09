@@ -23,8 +23,8 @@ namespace Sample5_Shooter
             _query = GetEntityQuery(
                 ComponentType.ReadWrite<Weapon>(),
                 ComponentType.Exclude<Firing>());
-
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            //Enabled = false;
         }
 
 
@@ -37,7 +37,7 @@ namespace Sample5_Shooter
 
             public void Execute(int index)
             {
-                if (FireStartTime > 0)
+                //if (FireStartTime > 0)
                 {
                     EntityCommandBuffer.AddComponent(Entities[index], new Firing()
                     {
@@ -51,8 +51,10 @@ namespace Sample5_Shooter
         {
             if (Input.GetButton("Fire1"))
             {
-                _weaponEntities = _query.ToEntityArray(Allocator.TempJob);
                 _buffer = _barrier.CreateCommandBuffer();
+                if(_weaponEntities != null && _weaponEntities.Length > 0)
+                    _weaponEntities.Dispose();
+                _weaponEntities = _query.ToEntityArray(Allocator.TempJob);
                 var job = new PlayerShootingJob()
                 {
                     Entities = _weaponEntities,
@@ -61,16 +63,17 @@ namespace Sample5_Shooter
                 };
                 inputDeps = job.Schedule(_weaponEntities.Length, 1, inputDeps);
                 _barrier.AddJobHandleForProducer(inputDeps);
+                
             }
 
             return inputDeps;
         }
 
-        protected override void OnDestroy()
+        protected override void OnCreateManager()
         {
-            _buffer.Dispose();
-            _query.Dispose();
-            _weaponEntities.Dispose();
+            //_buffer.Dispose();
+//            if(_weaponEntities.Length > 0)
+//                _weaponEntities.Dispose();
         }
     }
 }

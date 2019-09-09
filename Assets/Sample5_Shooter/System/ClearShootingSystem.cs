@@ -8,10 +8,12 @@ namespace Sample5_Shooter
     public class ClearShootingSystem : JobComponentSystem
     {
         private EndSimulationEntityCommandBufferSystem _barrier;
+        private EntityCommandBuffer _buffer;
 
         protected override void OnCreate()
         {
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            //Enabled = false;
         }
         private struct ClearShootingJob : IJobForEachWithEntity<Firing>
         {
@@ -21,7 +23,7 @@ namespace Sample5_Shooter
 
             public void Execute(Entity entity, int index, ref Firing firing)
             {
-                if (CurrentTime - firing.FireStartTime < 0.5f)
+                if (CurrentTime - firing.FireStartTime > Sample5.Instance.shootDeltaTime)
                 {
                     EntityCommandBuffer.RemoveComponent<Firing>(entity);
                 }
@@ -30,14 +32,20 @@ namespace Sample5_Shooter
         
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            _buffer = _barrier.CreateCommandBuffer();
             var job = new ClearShootingJob()
             {
                 CurrentTime = Time.time,
-                EntityCommandBuffer = _barrier.CreateCommandBuffer(),
+                EntityCommandBuffer = _buffer,
             };
             inputDeps = job.Schedule(this, inputDeps);
             _barrier.AddJobHandleForProducer(inputDeps);
             return inputDeps;
+        }
+
+        protected override void OnDestroyManager()
+        {
+            //_buffer.Dispose();
         }
     }
 }
