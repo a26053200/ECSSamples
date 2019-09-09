@@ -6,14 +6,14 @@ namespace Sample5_Shooter
 {
     public class PlayerInputSystem : ComponentSystem
     {
-        private const string HORIZONTAL = "Horizontal";
-        private const string VERTICAL = "Vertical";
+        private const string Horizontal = "Horizontal";
+        private const string Vertical = "Vertical";
         protected override void OnUpdate()
         {
-            Entities.ForEach((Transform transform ,ref PlayerInput input) =>
+            Entities.ForEach((ref PlayerInput input) =>
             {
-                input.Horizontal = Input.GetAxis(HORIZONTAL);
-                input.Vertical = Input.GetAxis(VERTICAL);
+                input.Horizontal = Input.GetAxis(Horizontal);
+                input.Vertical = Input.GetAxis(Vertical);
             });
         }
     }

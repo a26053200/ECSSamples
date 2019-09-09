@@ -24,7 +24,7 @@ namespace Sample5_Shooter
                 ComponentType.ReadWrite<Weapon>(),
                 ComponentType.Exclude<Firing>());
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-            //Enabled = false;
+//            Enabled = false;
         }
 
 

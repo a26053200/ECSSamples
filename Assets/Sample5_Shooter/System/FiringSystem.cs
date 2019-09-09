@@ -20,21 +20,21 @@ namespace Sample5_Shooter
 //            Enabled = false;
         }
 
-        private struct FiringJob : IJobForEachWithEntity_ECCC<Rotation, Firing, LocalToWorld>
+        private struct FiringJob : IJobForEachWithEntity_ECCC<Rotation, Firing, Translation>
         {
             public float FireStartTime;
             [ReadOnly] public EntityCommandBuffer EntityCommandBuffer;
 
-            public void Execute(Entity entity, int index, ref Rotation rotation, ref Firing firing, ref LocalToWorld localToWorld)
+            public void Execute(Entity entity, int index, ref Rotation rotation, ref Firing firing, ref Translation translation)
             {
                 if (!firing.IsFired)
                 {
-                    CreateBullet(FireStartTime,localToWorld, rotation, EntityCommandBuffer);
+                    CreateBullet(FireStartTime,translation, rotation, EntityCommandBuffer);
                     firing.IsFired = true;
                 }
             }
 
-            private void CreateBullet(float fireStartTime,LocalToWorld localToWorld, Rotation rotation, EntityCommandBuffer buffer)
+            private void CreateBullet(float fireStartTime,Translation translation, Rotation rotation, EntityCommandBuffer buffer)
             {
                 //Debug.Log("Generate a bullet");
                 Entity entity = buffer.CreateEntity(Sample5.BulletEntityArchetype);
@@ -51,10 +51,7 @@ namespace Sample5_Shooter
                 {
                     Value = Sample5.Instance.bulletScale
                 });
-                buffer.SetComponent(entity, new Translation()
-                {
-                    Value = localToWorld.Position
-                });
+                buffer.SetComponent(entity, translation);
                 buffer.SetSharedComponent(entity, new RenderMesh
                 {
                     mesh = Sample5.Instance.mesh,

@@ -26,8 +26,8 @@ namespace Sample5_Shooter
             public void Execute(Entity entity, int index, ref Translation translation, ref MoveSpeed moveSpeed, ref Rotation rotation, ref Bullet bullet)
             {
                 //Debug.Log(localToWorld.Forward);
-                var dir = math.forward(rotation.Value);
-                translation.Value.xyz += DeltaTime * moveSpeed.Speed * dir;
+                //var dir = math.forward(rotation.Value);
+                translation.Value.xyz += DeltaTime * moveSpeed.Speed * new float3(0,0,1);
                 if (CurrentTime - bullet.StartTime > 3f)
                 {
                     EntityCommandBuffer.DestroyEntity(entity);
@@ -43,7 +43,9 @@ namespace Sample5_Shooter
                 DeltaTime = Time.deltaTime,
                 EntityCommandBuffer = _barrier.CreateCommandBuffer(),
             };
-            return job.Schedule(this, inputDeps);
+            inputDeps = job.Schedule(this, inputDeps);
+            _barrier.AddJobHandleForProducer(inputDeps);
+            return inputDeps;
         }
 //        protected override void OnCreateManager()
 //        {

@@ -13,7 +13,7 @@ namespace Sample5_Shooter
         protected override void OnCreate()
         {
             _barrier = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-            //Enabled = false;
+//            Enabled = false;
         }
         private struct ClearShootingJob : IJobForEachWithEntity<Firing>
         {

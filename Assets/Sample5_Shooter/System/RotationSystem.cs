@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace Sample5_Shooter
@@ -7,7 +8,7 @@ namespace Sample5_Shooter
     {
         protected override void OnUpdate()
         {
-            Entities.ForEach((Transform transform ,ref PlayerInput input) =>
+            Entities.ForEach((ref Translation translation ,ref PlayerInput input ,ref Player player) =>
             {
                 if (Input.GetMouseButton(0) || Input.touchCount>0 && Input.GetTouch(0).phase== TouchPhase.Moved)
                 {
@@ -18,7 +19,7 @@ namespace Sample5_Shooter
                         var layerMask = LayerMask.GetMask("Floor");
                         if (Physics.Raycast(cameraRay, out var hit, 100, layerMask))
                         {
-                            var forward = hit.point - transform.position;
+                            var forward = hit.point - (Vector3)translation.Value;
                             var rotation = Quaternion.LookRotation(forward);
                             input.Rotation = new Quaternion(0,rotation.y,0, rotation.w);
                         }
